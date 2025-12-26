@@ -1,0 +1,147 @@
+package frc.robot.subsystems;
+
+import frc.robot.Constants;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.*;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
+
+public class ShooterSubsystem extends SubsystemBase {
+  public enum ShooterState {
+    SPINUP,
+    AT_TARGET,
+    IDLE
+  }
+
+  private final SparkMax m_motor;
+  private final SparkMax s_motor;
+  private final SparkClosedLoopController closedLoop;
+  private final RelativeEncoder encoder;
+  private final SimpleMotorFeedforward feedforward;
+
+  private ShooterState state = ShooterState.IDLE;
+  private double targetRPM = Double.NaN;
+
+  public ShooterSubsystem() {
+    m_motor = new SparkMax(Constants.ShooterConstants.M_MOTOR_ID, MotorType.kBrushless);
+    s_motor = new SparkMax(Constants.ShooterConstants.S_MOTOR_ID, MotorType.kBrushless);
+    encoder = m_motor.getEncoder();
+    
+    feedforward = new SimpleMotorFeedforward(
+      Constants.ShooterConstants.kS,
+      Constants.ShooterConstants.kV,
+      Constants.ShooterConstants.kA
+    );
+
+    SparkMaxConfig m_config = new SparkMaxConfig();
+    SparkMaxConfig s_config = new SparkMaxConfig();
+
+    m_config
+      .idleMode(IdleMode.kCoast)
+      .inverted(false)
+      .voltageCompensation(12.0);
+
+    m_config.smartCurrentLimit(40, 60);
+
+    m_config.encoder
+      .velocityConversionFactor(1.0 / Constants.ShooterConstants.kGearRatio);
+
+    m_config.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .pidf(
+        Constants.ShooterConstants.kP, 
+        Constants.ShooterConstants.kI, 
+        Constants.ShooterConstants.kD, 
+        Constants.ShooterConstants.kFF
+      );
+
+    m_motor.configure(m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    closedLoop = m_motor.getClosedLoopController();
+
+    s_config
+      .idleMode(IdleMode.kCoast)
+      .voltageCompensation(12.0);
+    
+    s_config.smartCurrentLimit(40, 60);
+    
+    s_config.follow(m_motor, Constants.ShooterConstants.kSecondaryInverted);
+    
+    s_motor.configure(s_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  public ShooterState getState() { 
+    return state; 
+  }
+
+  public void setTargetRPM(double targetRPM) { 
+    this.targetRPM = targetRPM; 
+  }
+
+  public double getTargetRPM() { 
+    return this.targetRPM; 
+  }
+
+  public double getVelocity() { 
+    return encoder.getVelocity(); 
+  }
+
+  public boolean isAtTargetVelocity() {
+    if (Double.isNaN(targetRPM)) {
+      return false;
+    }
+    return Math.abs(targetRPM - getVelocity()) < Constants.ShooterConstants.kTolerance;
+  }
+
+  public void stop() { 
+    this.targetRPM = Double.NaN;
+  }
+
+  private double calcFF() {
+    if (Double.isNaN(targetRPM)) {
+      return 0.0;
+    }
+    return feedforward.calculate(targetRPM / 60.0);
+  }
+
+  @Override
+  public void periodic() {
+    if (!Double.isNaN(targetRPM) && targetRPM > 0) {
+      closedLoop.setReference(
+        targetRPM, 
+        ControlType.kVelocity, 
+        ClosedLoopSlot.kSlot0,
+        calcFF()
+      );
+      
+      if (isAtTargetVelocity()) {
+        state = ShooterState.AT_TARGET;
+      } else {
+        state = ShooterState.SPINUP;
+      }
+    } else {
+      m_motor.stopMotor();
+      state = ShooterState.IDLE;
+    }
+
+    SmartDashboard.putNumber("Shooter/CurrentRPM", getVelocity());
+    SmartDashboard.putNumber("Shooter/TargetRPM", Double.isNaN(targetRPM) ? 0 : targetRPM);
+    SmartDashboard.putString("Shooter/State", state.toString());
+    SmartDashboard.putNumber("Shooter/Current", m_motor.getOutputCurrent());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+  }
+}
