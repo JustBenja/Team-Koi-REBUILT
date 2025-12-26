@@ -55,6 +55,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * Swerve drive object.
      */
     private final SwerveDrive swerveDrive;
+    
     /**
      * Enable vision odometry updates while driving.
      */
@@ -131,7 +132,8 @@ public class SwerveSubsystem extends SubsystemBase {
      * Setup the photon vision class.
      */
     public void setupPhotonVision() {
-        vision = new Vision();
+        vision = new Vision(swerveDrive::getPose);
+        swerveDrive.drive(null, lastVisionTime, visionDriveTest, visionDriveTest);
     }
 
     @Override
