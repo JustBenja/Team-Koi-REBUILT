@@ -5,6 +5,7 @@ import frc.robot.Constants;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
@@ -79,6 +80,13 @@ public class ShooterSubsystem extends SubsystemBase {
     s_config.follow(m_motor, Constants.ShooterConstants.kSecondaryInverted);
     
     s_motor.configure(s_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  // boilerplate command to use the subsystem
+  public Command setVelocityCommand(double setpoint) {
+    return runOnce(() -> {
+      setTargetRPM(setpoint);
+    });
   }
 
   public ShooterState getState() { 

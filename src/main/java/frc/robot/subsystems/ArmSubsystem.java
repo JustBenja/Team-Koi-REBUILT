@@ -17,6 +17,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class ArmSubsystem extends SubsystemBase {
   public enum ArmState {
@@ -31,7 +32,7 @@ public class ArmSubsystem extends SubsystemBase {
   private final DutyCycleEncoder ab_encoder;
   private final SparkClosedLoopController closedLoop;
 
-  private double targetAngle = Double.NaN; // Use NaN instead of Integer.MIN_VALUE
+  private double targetAngle = Double.NaN;
   private boolean hasInitialized = false;
 
   private ArmState state = ArmState.IDLE;
@@ -127,6 +128,13 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Arm/EncoderResynced", true);
       }
     }
+  }
+
+  // boilerplate command to use the subsystem
+  public Command setPositionCommand(double angle) {
+    return runOnce(() -> {
+      setTargetAngle(angle);
+    });
   }
 
   public ArmState getState() { 
