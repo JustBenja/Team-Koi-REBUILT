@@ -206,7 +206,7 @@ public class ArmSubsystem extends SubsystemBase {
       
       // Set reference with feedforward
       closedLoop.setReference(
-        targetAngle, 
+        targetAngle,
         ControlType.kMAXMotionPositionControl, 
         ClosedLoopSlot.kSlot0, 
         calcFF()
