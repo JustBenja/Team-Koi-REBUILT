@@ -2,7 +2,6 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ScoreCommand;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.Vision;
@@ -22,7 +21,6 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-  private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve"));
@@ -57,7 +55,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command scoreCommand = new ScoreCommand(shooterSubsystem, drivebase.getVision(), drivebase, armSubsystem);
+    Command scoreCommand = new ScoreCommand(shooterSubsystem, drivebase.getVision(), drivebase);
     
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     m_driverController.x().whileTrue(scoreCommand);

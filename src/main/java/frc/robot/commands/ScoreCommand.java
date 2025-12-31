@@ -2,11 +2,10 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.Vision;
-import frc.robot.subsystems.ArmSubsystem.ArmState;
+
 import frc.robot.subsystems.ShooterSubsystem.ShooterState;
 import frc.robot.subsystems.SwerveSubsystem.SwerveState;
 
@@ -20,16 +19,15 @@ public class ScoreCommand extends Command {
     private final ShooterSubsystem shooterSubsystem;
     private final Vision vision;
     private final SwerveSubsystem drivebase;
-    private final ArmSubsystem armSubsystem;
 
 
-    public ScoreCommand(ShooterSubsystem shooterSubsystem, Vision vision, SwerveSubsystem drivebase, ArmSubsystem armSubsystem) {
+    public ScoreCommand(ShooterSubsystem shooterSubsystem, Vision vision, SwerveSubsystem drivebase) {
         this.shooterSubsystem = shooterSubsystem;
         this.vision = vision;
         this.drivebase = drivebase;
-        this.armSubsystem = armSubsystem;
     }
 
+    // TODO: add hood code in
     @Override
     public void execute() {
         drivebase.AimAtScoringAprilla();
@@ -41,9 +39,7 @@ public class ScoreCommand extends Command {
         ShooterPoint target = interpolate(distance);
 
         shooterSubsystem.setTargetRPM(target.rpm);
-        armSubsystem.setTargetAngle(target.angleDeg);
         if (shooterSubsystem.getState() != ShooterState.AT_TARGET) return;
-        if (armSubsystem.getState() != ArmState.AT_TARGET) return;
 
         // release the ball or smth I guess
     }

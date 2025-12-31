@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -61,11 +62,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .pidf(
+      .pid(
         Constants.ShooterConstants.kP, 
         Constants.ShooterConstants.kI, 
-        Constants.ShooterConstants.kD, 
-        Constants.ShooterConstants.kFF
+        Constants.ShooterConstants.kD 
       );
 
     m_motor.configure(m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -120,15 +120,16 @@ public class ShooterSubsystem extends SubsystemBase {
     if (Double.isNaN(targetRPM)) {
       return 0.0;
     }
-    return feedforward.calculate(targetRPM / 60.0);
+    return feedforward.calculate(targetRPM);
   }
 
   @Override
   public void periodic() {
-    if (!Double.isNaN(targetRPM) && targetRPM > 0) {
+    
+     if (!Double.isNaN(targetRPM)) { 
       closedLoop.setReference(
         targetRPM, 
-        ControlType.kVelocity, 
+        ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
         calcFF()
       );
