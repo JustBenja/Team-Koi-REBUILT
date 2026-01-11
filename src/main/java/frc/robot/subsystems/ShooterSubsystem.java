@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.*;
 
@@ -64,7 +62,7 @@ public class ShooterSubsystem extends SubsystemBase {
         .kV(Constants.ShooterConstants.kV)
         .kA(Constants.ShooterConstants.kA);
 
-    m_motor.configure(m_config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_motor.configure(m_config, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
     closedLoop = m_motor.getClosedLoopController();
 
     s_config
@@ -75,7 +73,7 @@ public class ShooterSubsystem extends SubsystemBase {
     
     s_config.follow(m_motor, Constants.ShooterConstants.kSecondaryInverted);
     
-    s_motor.configure(s_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    s_motor.configure(s_config, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
   }
 
   // boilerplate command to use the subsystem
