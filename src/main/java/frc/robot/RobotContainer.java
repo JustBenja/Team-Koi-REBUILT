@@ -58,6 +58,7 @@ public class RobotContainer {
     Command scoreCommand = new ScoreCommand(shooterSubsystem, drivebase.getVision(), drivebase);
     
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    m_driverController.rightBumper().whileTrue(drivebase.driveRelativeToHub(driveAngularVelocity));
     m_driverController.x().whileTrue(scoreCommand);
   }
 

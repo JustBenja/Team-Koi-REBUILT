@@ -1,28 +1,31 @@
 package frc.robot.subsystems;
-import java.util.ArrayList;
 
 import frc.robot.Constants;
 import swervelib.SwerveDrive;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.PoseEstimate;
-import frc.robot.utils.LimelightHelpers.RawFiducial;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.Optional;
-import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 
-public class Vision extends SubsystemBase {
+public class Vision {
+    private static Vision _instance;    
+    public static Vision getInstance() {
+        if (_instance == null) {
+            _instance = new Vision();
+        }
+        return _instance;
+    }
+    
     private final String _limelightName;
-    private Supplier<Pose2d> getPosition;
+    private Pose2d currentPosition;
 
-    public Vision(Supplier<Pose2d> getPosition) {
+    private Vision() {
         _limelightName = Constants.VisionConstants.kLimelightName;
-        this.getPosition = getPosition;
+        currentPosition = new Pose2d();
     }
 
-    public void updatePoseEstimation(SwerveDrive swerveDrive) {
+    public boolean updatePoseEstimation(SwerveDrive swerveDrive) {
         double robotYaw = swerveDrive.getYaw().getDegrees();
         LimelightHelpers.SetRobotOrientation(_limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
     
@@ -33,59 +36,16 @@ public class Vision extends SubsystemBase {
             est = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(_limelightName);
         }
 
-        if (est == null) return;
-        if (est.tagCount < 1) return;
-        if (est.pose == null) return;
+        currentPosition = swerveDrive.getPose();
+
+        if (est == null) return false;
+        if (est.tagCount < 1) return false;
+        if (est.pose == null) return false;
 
         swerveDrive.addVisionMeasurement(est.pose,est.timestampSeconds);
+        currentPosition = swerveDrive.getPose();
+        return true;
     }
 
-    // returns a prioritized tag for scoring that was captured by the vision system
-    public Optional<RawFiducial> getScoringTag() {
-        var fiducials = LimelightHelpers.getRawFiducials(_limelightName);
-        ArrayList<RawFiducial> found = new ArrayList<>();
-    
-        // Filter only scoring tags first
-        for (RawFiducial f : fiducials) {
-            if (Constants.VisionConstants.scoringTags.containsKey(f.id)) {
-                found.add(f);
-            }
-        }
-    
-        if (found.isEmpty()) return Optional.empty();
-        if (found.size() == 1) return Optional.of(found.get(0));
-    
-        // Filter by ambiguity without mutating during iteration
-        ArrayList<RawFiducial> filtered = new ArrayList<>();
-        for (RawFiducial f : found) {
-            if (f.ambiguity <= Constants.VisionConstants.kAmbiguityTolerance) {
-                filtered.add(f);
-            }
-        }
-    
-        if (filtered.isEmpty()) return Optional.empty();
-    
-        // Pick the closest tag
-        double minDist = Double.MAX_VALUE;
-        RawFiducial best = null;
-        for (RawFiducial f : filtered) {
-            if (f.distToRobot < minDist) {
-                minDist = f.distToRobot;
-                best = f;
-            }
-        }
-    
-        return Optional.ofNullable(best);
-    }
-    
-
-    @Override
-    public void periodic() {
-        
-    }
-
-    public void simulationPeriodic()
-    {
-
-    }
+    public Pose2d getPosition() {return currentPosition;}
 }

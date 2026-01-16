@@ -1,7 +1,11 @@
 package frc.robot;
 import java.util.Map;
-import edu.wpi.first.math.util.Units;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.commands.ScoreCommand.ShooterPoint;
 
 public final class Constants {
@@ -11,22 +15,26 @@ public final class Constants {
     public static final double kDeadband = 0.3;
   }
 
+  public static class FieldConstants {
+    private static final Pose2d kBlueHub = new Pose2d(0, 0, new Rotation2d());
+    private static final Pose2d kRedHub = new Pose2d(0, 0, new Rotation2d());
+    public static Pose2d getHubPose() { 
+      return DriverStation.getAlliance()
+        .orElse(Alliance.Blue) == Alliance.Red
+            ? kRedHub
+            : kBlueHub;
+    }
+  }
+
   public static class VisionConstants {
     public static final String kLimelightName = "";
-
-    public static final Map<Integer, Boolean> scoringTags = Map.of(
-      // unintellegent pre-season data
-     1,true,
-     5, true
-    );
-    public static final double kAmbiguityTolerance = 0.7;
   }
 
   public static class SwerveDriveConstants {
     public static final double kMaxSpeed = Units.feetToMeters(20);
     public static final double kVisionPeriod = 0.1; // 10Hz
     public static final double kTargetErrorTolerance = Math.toRadians(3);
-    public static final double kRotationP = 0.25;
+    public static final double kPr = 0.0, kIr = 0.0, kDr = 0.0;
   }
 
   public static class ShooterConstants {

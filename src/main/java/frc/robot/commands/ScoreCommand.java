@@ -30,7 +30,7 @@ public class ScoreCommand extends Command {
     // TODO: add hood code in
     @Override
     public void execute() {
-        drivebase.AimAtScoringAprilla();
+        /*(drivebase.AimAtScoringAprilla();
         if (drivebase.getState() != SwerveState.VISION_LOCKED) return;
         var f = vision.getScoringTag();
         if (!f.isPresent()) return;
@@ -39,7 +39,7 @@ public class ScoreCommand extends Command {
         ShooterPoint target = interpolate(distance);
 
         shooterSubsystem.setTargetRPM(target.rpm);
-        if (shooterSubsystem.getState() != ShooterState.AT_TARGET) return;
+        if (shooterSubsystem.getState() != ShooterState.AT_TARGET) return;*/
 
         // release the ball or smth I guess
     }

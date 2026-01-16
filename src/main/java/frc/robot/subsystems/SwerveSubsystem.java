@@ -16,6 +16,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -50,21 +52,20 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase {
-public enum SwerveState {
-    IDLE,
-    TELEOP,
-    AUTO,
-    VISION_AIMING,
-    VISION_LOCKED,
-    AUTO_DRIVE
-}
+    public enum SwerveState {
+        IDLE,
+        TELEOP,
+        AUTO,
+        VISION_AIMING,
+        AUTO_DRIVE
+    }
 
-//#region intialization
+    // #region intialization
     /**
      * Swerve drive object.
      */
     private final SwerveDrive swerveDrive;
-    
+
     /**
      * Enable vision odometry updates while driving.
      */
@@ -75,6 +76,8 @@ public enum SwerveState {
     private Vision vision;
 
     private double lastVisionTime = 0.0;
+
+    private final PIDController RotationPID;
 
     private SwerveState state = SwerveState.IDLE;
 
@@ -122,6 +125,9 @@ public enum SwerveState {
             swerveDrive.stopOdometryThread();
         }
         setupPathPlanner();
+        RotationPID = new PIDController(Constants.SwerveDriveConstants.kPr, Constants.SwerveDriveConstants.kIr,
+                Constants.SwerveDriveConstants.kDr);
+        RotationPID.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -136,14 +142,16 @@ public enum SwerveState {
                 Constants.SwerveDriveConstants.kMaxSpeed,
                 new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
                         Rotation2d.fromDegrees(0)));
-
+        RotationPID = new PIDController(Constants.SwerveDriveConstants.kPr, Constants.SwerveDriveConstants.kIr,
+                Constants.SwerveDriveConstants.kDr);
+        RotationPID.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
-     * Setup the photon vision class.
+     * Setup the limelight vision class.
      */
     public void setupVision() {
-        vision = new Vision(swerveDrive::getPose);
+        vision = Vision.getInstance();
         swerveDrive.drive(null, lastVisionTime, visionDriveTest, visionDriveTest);
     }
 
@@ -243,9 +251,9 @@ public enum SwerveState {
         // event markers.
         return new PathPlannerAuto(pathName);
     }
-//#endregion
+    // #endregion
 
-//#region drive commands
+    // #region drive commands
     /**
      * Use PathPlanner Path finding to go to a point on the field.
      *
@@ -451,9 +459,16 @@ public enum SwerveState {
         });
     }
 
-    //#endregion
+    public Command driveRelativeToHub(Supplier<ChassisSpeeds> velocity) {
+        state = SwerveState.VISION_AIMING;
+        return run(() -> {
+            driveWhileAiming(velocity);
+        }).finallyDo(() -> state = SwerveState.IDLE);
+    }
 
-//#region drive methods
+    // #endregion
+
+    // #region drive methods
     /**
      * The primary method for controlling the drivebase. Takes a
      * {@link Translation2d} and a rotation rate, and
@@ -493,8 +508,6 @@ public enum SwerveState {
         swerveDrive.driveFieldOriented(velocity);
     }
 
-    
-
     /**
      * Drive according to the chassis robot oriented velocity.
      *
@@ -504,35 +517,35 @@ public enum SwerveState {
         swerveDrive.drive(velocity);
     }
 
-//#endregion
+    // #endregion
 
-//#region Vision Aiming
+    // #region Vision Aiming
 
-public Command AimAtScoringAprilla() {
-    var f = vision.getScoringTag();
-    if (!f.isPresent())
-    {
-        state = SwerveState.IDLE;
-        return runOnce(() -> {}); // return an empty command;
+    /**
+     * Drives the robot using field-relative translation while automatically
+     * rotating
+     * to aim at the hub using a PID controller.
+     *
+     * - `velocity` - controller input
+    */
+    public void driveWhileAiming(Supplier<ChassisSpeeds> velocity) {
+        state = SwerveState.VISION_AIMING;
+        Pose2d hub = Constants.FieldConstants.getHubPose();
+        Pose2d robotPose = getPose();
+
+        Rotation2d angleToHub = hub.getTranslation()
+                .minus(robotPose.getTranslation())
+                .getAngle();
+
+        double angularVelo = RotationPID.calculate(angleToHub.getRadians(), getHeading().getRadians());
+        ChassisSpeeds SwerveSpeed = velocity.get();
+        SwerveSpeed.omegaRadiansPerSecond = angularVelo;
+        swerveDrive.driveFieldOriented(SwerveSpeed);
     }
-    var fiducial = f.get();
 
-    /*
-     * for now we will just calculate the angle and move him
-     * later we might change to path planner autos
-     */
+    // #endregion
 
-    double angleRad = Math.toRadians(fiducial.txnc);
-
-    state = Math.abs(angleRad) < Constants.SwerveDriveConstants.kTargetErrorTolerance ? SwerveState.VISION_LOCKED : SwerveState.VISION_AIMING;
-
-    double angleRadPerSec = angleRad * Constants.SwerveDriveConstants.kRotationP;
-    return runOnce(() -> drive(new Translation2d(0, 0), angleRadPerSec, false));
-}
-
-//#endregion
-
-//#region util
+    // #region util
     /**
      * Get the swerve drive kinematics object.
      *
@@ -756,5 +769,5 @@ public Command AimAtScoringAprilla() {
     public Vision getVision() {
         return this.vision;
     }
-//#endregion
+    // #endregion
 }

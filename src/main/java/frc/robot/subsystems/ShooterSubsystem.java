@@ -36,7 +36,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
 
     SparkMaxConfig m_config = new SparkMaxConfig();
-    SparkMaxConfig s_config = new SparkMaxConfig();
 
     m_config
       .idleMode(IdleMode.kCoast)
