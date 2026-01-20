@@ -78,4 +78,29 @@ public final class Constants {
 
   public static final double kMaxShootingDist = 4.0;
 }
+
+public static class IntakeArmConstants{
+  // WRONG VALUES! set the ID and parameters for later
+  public static final int kAbsoluteEncoderID = 0;
+  public static final int kMotorID = 0;
+
+  public static final double kP = 0;
+  public static final double kI = 0;
+  public static final double kD = 0;
+  public static final double kFF = 0;
+    
+  public static final double kS = 0;
+  public static final double kV = 0;
+  public static final double kA = 0;
+  public static final double kG = 0;
+
+  public static final int ABS_ENCODER_CHANNEL = 0;
+  public static final int ABS_ENCODER_RANGE = 360;
+  public static final int ABS_ENCODER_OFFSET = 0;
+
+  // WRONG VALUES! maxmotion constants
+  public static final double kMAXMotionAcceleration = 0;
+  public static final double kMAXVelocity = 0;
+  public static final double kTolerance = 0.2;
+}
 }
