@@ -30,8 +30,8 @@ public final class Constants {
 
   public static class FieldConstants {
     // We'll wait for 6238 positions for that
-    private static final Pose2d kBlueHub = Pose2d();
-    private static final Pose2d kRedHub = Pose2d();
+    private static final Pose2d kBlueHub = new Pose2d();
+    private static final Pose2d kRedHub = new Pose2d();
 
     public static Pose2d getHubPose() {
       return DriverStation.getAlliance()
