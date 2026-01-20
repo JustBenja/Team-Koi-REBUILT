@@ -29,35 +29,9 @@ public final class Constants {
   }
 
   public static class FieldConstants {
-    public static final AprilTagFieldLayout kFieldApril = AprilTagFieldLayout
-        .loadField(AprilTagFields.k2026RebuiltWelded);
-
-    private static int kBlueHubTags[] = { 21, 26, 18, 20 };
-    private static int kRedHubTags[] = { 5, 10, 2, 4 };
-
-    private static Pose2d MakeHubPosition(boolean isBlue) {
-      int arr[] = isBlue ? kBlueHubTags : kRedHubTags;
-      ArrayList<Pose2d> arrPose = new ArrayList<Pose2d>();
-      for (var i : arr) {
-        Pose3d p = kFieldApril.getTagPose(i).get();
-        arrPose.add(new Pose2d(p.getX(), p.getY(), new Rotation2d()));
-      }
-
-      double sumX = 0;
-      double sumY = 0;
-      for (Pose2d pose : arrPose) {
-        sumX += pose.getX();
-        sumY += pose.getY();
-      }
-
-      double avgX = sumX / arrPose.size();
-      double avgY = sumY / arrPose.size();
-
-      return new Pose2d(avgX, avgY, new Rotation2d());
-    }
-
-    private static final Pose2d kBlueHub = MakeHubPosition(true);
-    private static final Pose2d kRedHub = MakeHubPosition(false);
+    // We'll wait for 6238 positions for that
+    private static final Pose2d kBlueHub = Pose2d();
+    private static final Pose2d kRedHub = Pose2d();
 
     public static Pose2d getHubPose() {
       return DriverStation.getAlliance()
