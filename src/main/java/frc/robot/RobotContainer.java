@@ -5,6 +5,7 @@ import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IntakeArmSubsystem;
 import frc.robot.subsystems.IntakeRollerSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -35,6 +36,7 @@ public class RobotContainer {
   private final IntakeArmSubsystem intakeArmSubsystem = new IntakeArmSubsystem();
   private final IntakeRollerSubsytem intakeRollerSubsytem = new IntakeRollerSubsytem();
   private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
+  private final HoodSubsystem hoodSubsystem = new HoodSubsystem();
 
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       RobotBase.isSimulation() ? "swerve-sim" : "swerve"));
@@ -69,7 +71,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command scoreCommand = new ScoreCommand(shooterSubsystem, feederSubsystem, rumbleSubsystem);
+    Command scoreCommand = new ScoreCommand(shooterSubsystem, hoodSubsystem, feederSubsystem, rumbleSubsystem);
     Command IntakeCommand = new IntakeCommand(intakeArmSubsystem, intakeRollerSubsytem, rumbleSubsystem);
     
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);

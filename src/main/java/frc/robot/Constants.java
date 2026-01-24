@@ -86,11 +86,11 @@ public final class Constants {
 
     // fake data for now
     public static final ShooterPoint[] kShooterLUT = {
-        new ShooterPoint(2.0, 3100),
-        new ShooterPoint(2.5, 3350),
-        new ShooterPoint(3.0, 3600),
-        new ShooterPoint(3.5, 3900),
-        new ShooterPoint(4.0, 4250)
+        new ShooterPoint(2.0, 3100, 45),
+        new ShooterPoint(2.5, 3350, 46),
+        new ShooterPoint(3.0, 3600, 47),
+        new ShooterPoint(3.5, 3900, 50),
+        new ShooterPoint(4.0, 4250, 67)
     };
 
     public static final double kMaxShootingDist = 4.0;

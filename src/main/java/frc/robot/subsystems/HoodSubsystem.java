@@ -8,18 +8,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class HoodSubsystem extends SubsystemBase {
-
-    public enum HoodStates {
-        MOVING,
-        ATSETPOINT
-    }
-
-    private Servo servoYehodi, servoGoy;
-    private HoodStates state;
+    private Servo servoRight, servoLeft;
 
     public HoodSubsystem() {
-        servoYehodi = new Servo(Constants.HoodConstants.kServoIdYehodi);
-        servoGoy = new Servo(Constants.HoodConstants.kServoIdGoy);
+        servoRight = new Servo(Constants.HoodConstants.kServoIdYehodi);
+        servoLeft = new Servo(Constants.HoodConstants.kServoIdGoy);
 
         setAngle(Constants.HoodConstants.kStartingPos);
     }
@@ -42,16 +35,10 @@ public class HoodSubsystem extends SubsystemBase {
         double rightPwm = Constants.HoodConstants.kServoMin
                 + (1.0 - normalized) * (Constants.HoodConstants.kServoMax - Constants.HoodConstants.kServoMin);
 
-        servoYehodi.set(leftPwm);
-        servoGoy.set(rightPwm);
+        servoRight.set(leftPwm);
+        servoLeft.set(rightPwm);
 
-        state = HoodStates.MOVING;
         Timer.delay(Constants.HoodConstants.kServoDelay);
-        state = HoodStates.ATSETPOINT;
-    }
-
-    public HoodStates getState(){
-        return state;
     }
 
     public Command HoodMethodCommand(double angle) {
