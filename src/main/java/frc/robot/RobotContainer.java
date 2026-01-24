@@ -13,6 +13,7 @@ import java.io.File;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
@@ -64,6 +65,8 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     m_driverController.rightBumper().whileTrue(drivebase.driveRelativeToHub(driveAngularVelocity));
     m_driverController.x().whileTrue(scoreCommand);
+
+    m_driverController.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
   }
 
   public Command getAutonomousCommand() {

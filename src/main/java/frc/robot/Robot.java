@@ -29,9 +29,6 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  Field2d field = new Field2d();
-  StructPublisher<Pose2d> publisher;
-
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -45,11 +42,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotInit() {
-    publisher = NetworkTableInstance.getDefault()
-                                    .getStructTopic("MyPose", Pose2d.struct).publish();
-    publisher.set(Vision.getInstance().getPosition());
-  }
+  public void robotInit() {}
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items
@@ -138,7 +131,5 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    publisher.set(Vision.getInstance().getPosition());
-    
   }
 }

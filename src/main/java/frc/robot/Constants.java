@@ -41,7 +41,8 @@ public final class Constants {
   }
 
   public static class SwerveDriveConstants {
-    public static final double kMaxSpeed = Units.feetToMeters(20);
+    public static final double kMaxSpeed = Units.feetToMeters(17.6);
+    public static final double kMaxAngularVelocity = Math.PI;
     public static final double kAimingSpeedModifier = 0.5;
     public static final double kVisionPeriod = 0.1; // 10Hz
     public static final double kTargetErrorTolerance = Math.toRadians(3);
