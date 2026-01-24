@@ -97,6 +97,17 @@ public final class Constants {
 
     public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
   }
+  
+  public static class HoodConstants {
+    public static final int kServoIdYehodi = 0;
+    public static final int kServoIdGoy = 0;
+    public static final double kMinDeg = 0;
+    public static final double kMaxDeg = 0;
+    public static final int kServoMin = 0;
+    public static final int kServoMax = 0;
+    public static final int kStartingPos = 0;
+    public static final double kServoDelay = 0.1;
+  }
 
   public static class IntakeArmConstants {
     public static final int kAbsoluteEncoderID = 0;
@@ -153,5 +164,4 @@ public final class Constants {
     public static double kMetersPerRotation = 0.0;
 
   }
-
 }
