@@ -1,7 +1,12 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ScoreCommand;
+import frc.robot.subsystems.ClimberSubsystem;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.IntakeArmSubsystem;
+import frc.robot.subsystems.IntakeRollerSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utils.GameDataSubsystem;
@@ -26,6 +31,10 @@ public class RobotContainer {
   private final GameDataSubsystem gameDataSubsystem = new GameDataSubsystem(rumbleSubsystem);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+  private final FeederSubsystem feederSubsystem = new FeederSubsystem();
+  private final IntakeArmSubsystem intakeArmSubsystem = new IntakeArmSubsystem();
+  private final IntakeRollerSubsytem intakeRollerSubsytem = new IntakeRollerSubsytem();
+  private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
 
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       RobotBase.isSimulation() ? "swerve-sim" : "swerve"));
@@ -60,11 +69,13 @@ public class RobotContainer {
 
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command scoreCommand = new ScoreCommand(shooterSubsystem);
+    Command scoreCommand = new ScoreCommand(shooterSubsystem, feederSubsystem, rumbleSubsystem);
+    Command IntakeCommand = new IntakeCommand(intakeArmSubsystem, intakeRollerSubsytem, rumbleSubsystem);
     
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     m_driverController.rightBumper().whileTrue(drivebase.driveRelativeToHub(driveAngularVelocity));
-    m_driverController.x().whileTrue(scoreCommand);
+    m_driverController.rightTrigger().whileTrue(scoreCommand);
+    m_driverController.leftTrigger().whileTrue(IntakeCommand);
 
     m_driverController.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
   }

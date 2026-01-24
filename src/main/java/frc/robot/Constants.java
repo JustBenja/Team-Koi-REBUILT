@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.commands.ScoreCommand.ShooterPoint;
@@ -11,7 +10,7 @@ import frc.robot.utils.RumblePack;
 public final class Constants {
   public static class OperatorConstants {
 
-    public final class ClimberConstants{
+    public final class ClimberConstants {
       public static double kS = 0.0;
       public static double kF = 0.0;
       public static double kG = 0.0;
@@ -20,15 +19,15 @@ public final class Constants {
       public static double kP = 0.0;
       public static double kI = 0.0;
       public static double kD = 0.0;
-      public static double tolerance=0.0;
+      public static double tolerance = 0.0;
 
       public static int MOTOR1_CAN_ID = 0;
       public static int MOTOR2_CAN_ID = 0;
 
       public static double METERS_PER_ROTATION = 0.0;
 
-      }
-      
+    }
+
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
     public static final double kDeadband = 0.3;
@@ -95,6 +94,8 @@ public final class Constants {
     };
 
     public static final double kMaxShootingDist = 4.0;
+
+    public static final RumblePack kRumbleScoreReady = new RumblePack(0.3, 0.2, Priority.MEDIUM);
   }
 
   public static class IntakeArmConstants {
@@ -123,28 +124,34 @@ public final class Constants {
 
   public static class IntakeRollerConstants {
     public static final int kMotorID = 18;
+
+    public static final double kIntakePower = 0.5;
+
+    public static final RumblePack kIntakeReadyRumble = new RumblePack(0.3, 0.2, Priority.LOW);
   }
 
   public static class FeederConstants {
     public static final int kMotorID = 19;
+
+    public static final double kGrabPower = 0.2;
   }
-   public final class ClimberConstants{
-      public static double kS = 0.0;
-      public static double kF = 0.0;
-      public static double kG = 0.0;
-      public static double kV = 0.0;
-      public static double kA = 0.0;
-      public static double kP = 0.0;
-      public static double kI = 0.0;
-      public static double kD = 0.0;
-      public static double kTolerance=0.5;
 
-      public static int kMainMotorID = 20;
-      public static int kSecondaryMotorID = 21;
+  public final class ClimberConstants {
+    public static double kS = 0.0;
+    public static double kF = 0.0;
+    public static double kG = 0.0;
+    public static double kV = 0.0;
+    public static double kA = 0.0;
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kTolerance = 0.5;
 
-      public static double kMetersPerRotation = 0.0;
+    public static int kMainMotorID = 20;
+    public static int kSecondaryMotorID = 21;
 
-      }
+    public static double kMetersPerRotation = 0.0;
 
-    
+  }
+
 }
