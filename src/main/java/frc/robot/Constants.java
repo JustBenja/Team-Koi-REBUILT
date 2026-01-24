@@ -80,34 +80,45 @@ public final class Constants {
         new ShooterPoint(4.0, 4250)
     };
 
-  public static final double kMaxShootingDist = 4.0;
-}
+    public static final double kMaxShootingDist = 4.0;
+  }
 
-public static class IntakeArmConstants{
-  public static final int kAbsoluteEncoderID = 0;
-  public static final int kMotorID = 0;
+  public static class IntakeArmConstants {
+    public static final int kAbsoluteEncoderID = 0;
+    public static final int kMotorID = 0;
 
-  public static final double kP = 0;
-  public static final double kI = 0;
-  public static final double kD = 0;
-  public static final double kFF = 0;
-    
-  public static final double kS = 0;
-  public static final double kV = 0;
-  public static final double kA = 0;
-  public static final double kG = 0;
-  public static final double kCosRatio = 1;
+    public static final double kP = 0;
+    public static final double kI = 0;
+    public static final double kD = 0;
+    public static final double kFF = 0;
 
-  public static final int kAbsoluteEncoderRange = 360;
-  public static final int kAbsoluteEncoderOffset = 0;
+    public static final double kS = 0;
+    public static final double kV = 0;
+    public static final double kA = 0;
+    public static final double kG = 0;
+    public static final double kCosRatio = 1;
 
-  public static final double kTolerance = 0.5;
+    public static final int kAbsoluteEncoderRange = 360;
+    public static final int kAbsoluteEncoderOffset = 0;
 
-  public static final int kOpenAngle = 67;
-  public static final int kClosedAngle = 0;
-}
+    public static final double kTolerance = 0.5;
 
-public static class feederConstants {
-  public static final int kMotorID = 0;
-}
+    public static final int kOpenAngle = 67;
+    public static final int kClosedAngle = 0;
+  }
+
+  public static class feederConstants {
+    public static final int kMotorID = 0;
+  }
+
+  public static class HoodConstants {
+    public static final int kServoIdYehodi = 0;
+    public static final int kServoIdGoy = 0;
+    public static final double kMinDeg = 0;
+    public static final double kMaxDeg = 0;
+    public static final int kServoMin = 0;
+    public static final int kServoMax = 0;
+    public static final int kStartingPos = 0;
+    public static final double kServoDelay = 0.1;
+  }
 }
