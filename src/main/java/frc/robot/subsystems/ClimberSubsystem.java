@@ -14,55 +14,62 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.OperatorConstants.ClimberConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+
 public class ClimberSubsystem extends SubsystemBase {
+   public enum climberstate
+   {
+      MOVING,
+      AT_TARGET
+   }
+
     private double targetHeight = 0.0;
-    private double targetVelocity = 0.0; 
+    private climberstate state = climberstate.MOVING; 
     private final SparkMax motor1;
     private final SparkMax motor2;
     private final RelativeEncoder encoder;
     private final SparkClosedLoopController closedLoop;
     private final ElevatorFeedforward feedforward;
   public ClimberSubsystem() {
-    motor1 = new SparkMax(ClimberConstants.MOTOR1_CAN_ID, MotorType.kBrushless);
-    motor2 = new SparkMax(ClimberConstants.MOTOR2_CAN_ID, MotorType.kBrushless);
+    motor1 = new SparkMax(Constants.ClimberConstants.MOTOR1_CAN_ID, MotorType.kBrushless);
+    motor2 = new SparkMax(Constants.ClimberConstants.MOTOR2_CAN_ID, MotorType.kBrushless);
     encoder = motor1.getEncoder();
     closedLoop = motor1.getClosedLoopController();
     SparkMaxConfig config = new SparkMaxConfig();
     SparkMaxConfig followerConfig = new SparkMaxConfig();
+
+    config.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+    .pid(
+      Constants.ClimberConstants.kP,
+      Constants.ClimberConstants.kI,
+      Constants.ClimberConstants.kD)
+
+      .feedForward
+      .kS(Constants.ClimberConstants.kS)
+      .kG(Constants.ClimberConstants.kG)
+      .kV(Constants.ClimberConstants.kV)
+      .kA(Constants.ClimberConstants.kA);
+
     config.idleMode(IdleMode.kBrake);
     config.encoder
-        .positionConversionFactor(ClimberConstants.METERS_PER_ROTATION)
-        .velocityConversionFactor(ClimberConstants.METERS_PER_ROTATION / 60.0);
-    config.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-    config.closedLoop.p(ClimberConstants.kP);
-    config.closedLoop.i(ClimberConstants.kI);
-    config.closedLoop.d(ClimberConstants.kD);
-    config.closedLoop.feedForward.kV(ClimberConstants.kF);
+        .positionConversionFactor(Constants.ClimberConstants.METERS_PER_ROTATION)
+        .velocityConversionFactor(Constants.ClimberConstants.METERS_PER_ROTATION / 60.0);
+  
+
     motor1.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    followerConfig.follow(motor1.getDeviceId()); 
-    followerConfig.inverted(false);
-    motor2.configure(followerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    feedforward = new ElevatorFeedforward(
-        ClimberConstants.kS,
-        ClimberConstants.kV,
-        ClimberConstants.kG,
-        ClimberConstants.kA
-    );
+    followerConfig.follow(motor1, true);
+    motor2.configure(followerConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+
+    
+
   }
-  public void moveUp() 
-  {
-    targetVelocity = 0.6;  
-  }
-  public void moveDown() 
-  {
-    targetVelocity = -0.6;
-  }
+ 
   public void stop() 
   {
-    targetVelocity = 0.0;
+    motor1.stopMotor();
   }
   public double getHeight() 
   {
@@ -79,12 +86,11 @@ public class ClimberSubsystem extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    double ffVolts = feedforward.calculate(targetVelocity);
-        closedLoop.setSetpoint(
-            targetVelocity,
-            ControlType.kVelocity,
-            ClosedLoopSlot.kSlot0,
-            ffVolts
-        );
+    closedLoop.setSetpoint(targetHeight, ControlType.kPosition);
+    if(Math.abs(targetHeight - getHeight()) < Constants.ClimberConstants.tolerance)
+    {
+        state = climberstate.AT_TARGET;
+    }
+    else state = climberstate.MOVING;
   }
 }
