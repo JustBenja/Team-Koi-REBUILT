@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -460,9 +461,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public Command driveRelativeToHub(Supplier<ChassisSpeeds> velocity) {
+        Translation2d vHubDist = vision.getPosition().getTranslation().minus(new Translation2d(FieldConstants.Hub.innerCenterPoint.getX(), FieldConstants.Hub.innerCenterPoint.getY()));
+        if (vHubDist.getNorm() > Constants.ShooterConstants.kMaxShootingDist) {
+            System.out.println("Robot is too far from the target");
+            return driveFieldOriented(velocity);
+        }
         state = SwerveState.VISION_AIMING;
         return run(() -> {
-            driveWhileAiming(velocity.get(), Constants.FieldConstants.getHubPose(), Constants.ShooterConstants.kMaxShootingDist);
+            driveWhileAiming(velocity.get(), new Pose2d(FieldConstants.Hub.innerCenterPoint.getX(), FieldConstants.Hub.innerCenterPoint.getY(), new Rotation2d()), Constants.ShooterConstants.kMaxShootingDist);
         }).finallyDo(() -> state = SwerveState.IDLE);
     }
 
@@ -530,11 +536,6 @@ public class SwerveSubsystem extends SubsystemBase {
      * - `target` - where the robot is looking to aim at
     */
     public void driveWhileAiming(ChassisSpeeds velocity, Pose2d target, double maxDist) {
-        Translation2d vHubDist = vision.getPosition().getTranslation().minus(Constants.FieldConstants.getHubPose().getTranslation());
-        if (vHubDist.getNorm() > maxDist) {
-            System.out.println("Robot is too far from the target");
-            return;
-        }
         state = SwerveState.VISION_AIMING;
         Pose2d robotPose = getPose();
 

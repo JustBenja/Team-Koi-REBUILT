@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -12,10 +14,10 @@ import frc.robot.utils.RumbleSubsystem;
 
 public class ScoreCommand extends Command {
     public record ShooterPoint(
-        double distanceMeters,
-        double rpm,
-        double hoodAngle
-    ) {}
+            double distanceMeters,
+            double rpm,
+            double hoodAngle) {
+    }
 
     private final ShooterSubsystem shooterSubsystem;
     private final HoodSubsystem hoodSubsystem;
@@ -25,7 +27,8 @@ public class ScoreCommand extends Command {
 
     private boolean firstTimeReady = true;
 
-    public ScoreCommand(ShooterSubsystem shooterSubsystem, HoodSubsystem hoodSubsystem, FeederSubsystem feederSubsystem, RumbleSubsystem rumble) {
+    public ScoreCommand(ShooterSubsystem shooterSubsystem, HoodSubsystem hoodSubsystem, FeederSubsystem feederSubsystem,
+            RumbleSubsystem rumble) {
         this.shooterSubsystem = shooterSubsystem;
         this.hoodSubsystem = hoodSubsystem;
         this.feederSubsystem = feederSubsystem;
@@ -36,7 +39,9 @@ public class ScoreCommand extends Command {
 
     @Override
     public void execute() {
-        double vHubDist = vision.getPosition().getTranslation().minus(Constants.FieldConstants.getHubPose().getTranslation()).getNorm();
+        double vHubDist = vision.getPosition().getTranslation()
+        .minus(new Translation2d(FieldConstants.Hub.innerCenterPoint.getX(), FieldConstants.Hub.innerCenterPoint.getY()))
+        .getNorm();
         if (vHubDist > Constants.ShooterConstants.kMaxShootingDist) {
             System.out.println("Robot is too far from the hub");
             return;
@@ -47,7 +52,8 @@ public class ScoreCommand extends Command {
         ShooterPoint sp = interpolate(vHubDist);
         shooterSubsystem.setTargetRPM(sp.rpm);
         hoodSubsystem.setAngle(sp.hoodAngle);
-        if (shooterSubsystem.getState() != ShooterState.AT_TARGET) return;
+        if (shooterSubsystem.getState() != ShooterState.AT_TARGET)
+            return;
         if (firstTimeReady) {
             rumble.rumble(Constants.ShooterConstants.kRumbleScoreReady);
             firstTimeReady = false;
@@ -56,33 +62,10 @@ public class ScoreCommand extends Command {
     }
 
     public static ShooterPoint interpolate(double distance) {
-    final ShooterPoint[] shooterLUT = Constants.ShooterConstants.kShooterLUT;
-    for (int i = 0; i < shooterLUT.length- 1; i++) {
-        ShooterPoint p1 = shooterLUT[i];
-        ShooterPoint p2 = shooterLUT[i + 1];
-
-        if (distance >= p1.distanceMeters()
-         && distance <= p2.distanceMeters()) {
-
-            double t = (distance - p1.distanceMeters())
-                     / (p2.distanceMeters() - p1.distanceMeters());
-
-            return new ShooterPoint(
+        return new ShooterPoint(
                 distance,
-                lerp(p1.rpm(),      p2.rpm(),      t),
-                lerp(p1.hoodAngle, p1.hoodAngle, t)
-            );
-        }
-    }
-
-    // Clamp to ends
-    if (distance < shooterLUT[0].distanceMeters())
-        return shooterLUT[0];
-    return shooterLUT[shooterLUT.length - 1];
-}
-
-    private static double lerp(double a, double b, double t) {
-        return a + (b - a) * t;
+                Constants.ShooterConstants.kRpmMap.get(distance),
+                Constants.ShooterConstants.kHoodMap.get(distance));
     }
 
     @Override
