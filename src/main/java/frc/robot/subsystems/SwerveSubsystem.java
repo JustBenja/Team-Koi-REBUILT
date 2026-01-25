@@ -28,9 +28,11 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
@@ -461,22 +463,6 @@ public class SwerveSubsystem extends SubsystemBase {
         });
     }
 
-    public Command driveRelativeToHub(Supplier<ChassisSpeeds> velocity) {
-        Translation2d vHubDist = vision.getPosition().getTranslation().minus(new Translation2d(
-                FieldConstants.Hub.innerCenterPoint.getX(), FieldConstants.Hub.innerCenterPoint.getY()));
-        if (vHubDist.getNorm() > Constants.ShooterConstants.kMaxShootingDist) {
-            System.out.println("Robot is too far from the target");
-            return driveFieldOriented(velocity);
-        }
-        state = SwerveState.VISION_AIMING;
-        return run(() -> {
-            driveWhileAiming(
-                    velocity.get(), new Pose2d(FieldConstants.Hub.innerCenterPoint.getX(),
-                            FieldConstants.Hub.innerCenterPoint.getY(), new Rotation2d()),
-                    Constants.ShooterConstants.kMaxShootingDist);
-        }).finallyDo(() -> state = SwerveState.IDLE);
-    }
-
     // #endregion
 
     // #region drive methods
@@ -576,6 +562,8 @@ public class SwerveSubsystem extends SubsystemBase {
         // --- 5. Apply angular PID toward target ---
         Rotation2d angleToTarget = toTargetDir.getAngle();
         velocity.omegaRadiansPerSecond = RotationPID.calculate(angleToTarget.getRadians(), getHeading().getRadians());
+        SmartDashboard.putNumber("VisionAiming/angle", angleToTarget.getDegrees());
+        SmartDashboard.putNumber("VisionAiming/speed", velocity.omegaRadiansPerSecond);
 
         // --- 6. Drive the swerve ---
         swerveDrive.driveFieldOriented(velocity);

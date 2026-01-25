@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.DriveRelativeToHubCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ScoreCommand;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -14,7 +15,9 @@ import frc.robot.utils.RumbleSubsystem;
 import swervelib.SwerveInputStream;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
@@ -55,8 +58,8 @@ public class RobotContainer {
 
     // Input streams
     driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-        () -> m_driverController.getLeftY() * (m_driverController.rightBumper().getAsBoolean() ? -0.4 : -1),
-        () -> m_driverController.getLeftX() * (m_driverController.rightBumper().getAsBoolean() ? -0.4 : -1))
+        () -> m_driverController.getLeftY() * (-1),
+        () -> m_driverController.getLeftX() * (-1))
         .withControllerRotationAxis(() -> m_driverController.getRightX() * -1)
         .deadband(OperatorConstants.kDeadband)
         .scaleTranslation(1)
@@ -71,7 +74,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    if (RobotBase.isReal()) {
+    if (!RobotBase.isReal()) {
       configureBindingsReal();
     } else {
       configureBindingsSim();
@@ -82,30 +85,37 @@ public class RobotContainer {
     rumbleSubsystem.setControllers(m_driverController, m_operatorController);
 
     Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    Command driveHubRelative = new DriveRelativeToHubCommand(drivebase, driveAngularVelocity);
     Command scoreCommand = new ScoreCommand(shooterSubsystem, hoodSubsystem, feederSubsystem);
     Command intakeCommand = new IntakeCommand(intakeArmSubsystem, intakeRollerSubsytem);
 
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-    m_driverController.rightBumper().whileTrue(drivebase.driveRelativeToHub(driveAngularVelocity));
+    m_driverController.rightBumper().whileTrue(driveHubRelative);
     m_driverController.rightTrigger().whileTrue(scoreCommand);
     m_driverController.leftTrigger().whileTrue(intakeCommand);
 
     m_driverController.a().onTrue(Commands.runOnce(drivebase::zeroGyro));
+
+    CommandScheduler.getInstance().registerSubsystem(new SubsystemBase() {
+      @Override
+      public void periodic() {
+        superstructure.periodic();
+      }
+    });
   }
 
   private void configureBindingsSim() {
     shooterSubsystem.setTargetRPM(1000);
 
     m_driverController.a().whileTrue(
-    Commands.run(() -> {
-        double current = shooterSubsystem.getTargetRPM();
-        if (!Double.isNaN(current)) {
+        Commands.run(() -> {
+          double current = shooterSubsystem.getTargetRPM();
+          if (!Double.isNaN(current)) {
             shooterSubsystem.setTargetRPM(current + 10);
-        } else {
+          } else {
             shooterSubsystem.setTargetRPM(1000); // some default starting RPM
-        }
-    }, shooterSubsystem)
-);
+          }
+        }, shooterSubsystem));
   }
 
   public Command getAutonomousCommand() {

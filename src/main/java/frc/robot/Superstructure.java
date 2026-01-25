@@ -4,6 +4,7 @@ import java.io.File;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FeederSubsystem.FeederState;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.IntakeArmSubsystem.IntakeArmState;
 import frc.robot.subsystems.IntakeRollerSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.ShooterSubsystem.ShooterState;
+import frc.robot.subsystems.SwerveSubsystem.SwerveState;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.ClimberSubsystem.ClimberState;
 import frc.robot.subsystems.IntakeRollerSubsytem.IntakeRollerState;
@@ -57,6 +59,29 @@ public class Superstructure {
         }
         return _instance;
     }
+
+    public void periodic() {
+    // Shooter
+    SmartDashboard.putString("Superstructure/ShooterState", getShooterState().toString());
+
+    // Feeder
+    SmartDashboard.putString("Superstructure/FeederState", getFeederState().toString());
+
+    // Intake Arm
+    SmartDashboard.putString("Superstructure/IntakeArmState", getIntakeState().toString());
+
+    // Intake Roller
+    SmartDashboard.putString("Superstructure/IntakeRollerState", getIntakeRollerState().toString());
+
+    // Climber
+    SmartDashboard.putString("Superstructure/ClimberState", getClimberState().toString());
+    SmartDashboard.putNumber("Superstructure/ClimberHeight", getClimberHeight());
+
+    // Drivebase
+    SmartDashboard.putNumber("Superstructure/HubRelativeRadialSpeed", getSwerveHubRelativeRadialSpeed());
+    SmartDashboard.putNumber("Superstructure/HubRelativeStrafeSpeed", getSwerveHubRelativeStrafeSpeed());
+    SmartDashboard.putString("Superstructure/SwerveState", getDrivebase().getState().toString());
+}
 
     // Getters
     public RumbleSubsystem getRumbleSubsystem() {
@@ -128,5 +153,9 @@ public class Superstructure {
     
     public double getSwerveHubRelativeStrafeSpeed() {
         return drivebase.getHubRelativeVelocity().radialSpeed();
+    }
+
+    public SwerveState getSwerveState() {
+        return drivebase.getState();
     }
 }
