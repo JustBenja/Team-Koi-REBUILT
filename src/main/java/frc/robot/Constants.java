@@ -170,6 +170,9 @@ public final class Constants {
 
     public static int kMainMotorID = 20;
     public static int kSecondaryMotorID = 21;
+    public static int kDutyCycleChannel = 0;
+
+    public static int kDutyCycleOffset = 0;
 
     public static double kMetersPerRotation = 0.0;
 

@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.*;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 
@@ -27,6 +28,7 @@ public class ClimberSubsystem extends SubsystemBase {
   private final SparkMax m_motor;
   private final SparkMax s_motor;
   private final RelativeEncoder encoder;
+  private final DutyCycleEncoder abs_encoder;
   private final SparkClosedLoopController closedLoop;
   private boolean isGrounded = true;
 
@@ -34,6 +36,7 @@ public class ClimberSubsystem extends SubsystemBase {
     m_motor = new SparkMax(Constants.ClimberConstants.kMainMotorID, MotorType.kBrushless);
     s_motor = new SparkMax(Constants.ClimberConstants.kSecondaryMotorID, MotorType.kBrushless);
     encoder = m_motor.getEncoder();
+    abs_encoder = new DutyCycleEncoder(Constants.ClimberConstants.kDutyCycleChannel, Constants.ClimberConstants.kMetersPerRotation, Constants.ClimberConstants.kDutyCycleOffset);
     closedLoop = m_motor.getClosedLoopController();
     SparkMaxConfig config = new SparkMaxConfig();
     SparkMaxConfig followerConfig = new SparkMaxConfig();
@@ -74,6 +77,8 @@ public class ClimberSubsystem extends SubsystemBase {
     s_motor.configure(followerConfig, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
 
+
+    encoder.setPosition(abs_encoder.get());
   }
 
   public Command setHeightCommandGround(double height) {
