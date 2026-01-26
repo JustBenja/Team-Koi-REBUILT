@@ -35,11 +35,10 @@ public class DriveRelativeToHubCommand extends Command {
             drivebase.driveWhileAiming(
                     velocity.get(),
                     new Pose2d(
-                            FieldConstants.Hub.innerCenterPoint.getX(),
-                            FieldConstants.Hub.innerCenterPoint.getY(),
+                            FieldConstants.Hub.topCenterPoint.getX(),
+                            FieldConstants.Hub.topCenterPoint.getY(),
                             new Rotation2d()
-                    ),
-                    Constants.ShooterConstants.kMaxShootingDist
+                    )
             );
         }
     }

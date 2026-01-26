@@ -30,11 +30,11 @@ public final class Constants {
   public static class SwerveDriveConstants {
     public static final double kMaxSpeed = 5.36448;
     public static final double kMaxAngularVelocity = 2* Math.PI;
-    public static final double kAimingSpeedModifier = 0.5;
+    public static final double kAimingSpeedModifier = 2.5;
     public static final double kMaxStrafe = 0.5; // max strafe speed while aiming
     public static final double kVisionPeriod = 0.1; // 10Hz
     public static final double kTargetErrorTolerance = Math.toRadians(3);
-    public static final double kPr = 0.2, kIr = 0.0, kDr = 0.01;
+    public static final double kPr = 0.15, kIr = 0.0, kDr = 0.02;
   }
 
   public static class ShooterConstants {

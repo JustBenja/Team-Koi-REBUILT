@@ -39,6 +39,7 @@ import frc.robot.FieldConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.ConstantCallSite;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
@@ -526,46 +527,66 @@ public class SwerveSubsystem extends SubsystemBase {
      * - `velocity` - controller input
      * - `target` - where the robot is looking to aim at
      */
-    public void driveWhileAiming(ChassisSpeeds velocity, Pose2d target, double maxStrafe) {
+    public void driveWhileAiming(ChassisSpeeds velocity, Pose2d target) {
         state = SwerveState.VISION_AIMING;
         Pose2d robotPose = getPose();
 
-        // --- 1. Compute vector toward target ---
+        // --- 1. Compute angle to target for aiming ---
         Translation2d toTarget = target.getTranslation().minus(robotPose.getTranslation());
         double distance = toTarget.getNorm();
+
         if (distance < 1e-6) {
-            // Already at target
             swerveDrive.driveFieldOriented(new ChassisSpeeds(0, 0, 0));
             return;
         }
-        Translation2d toTargetDir = toTarget.div(distance); // normalized radial direction
 
-        // --- 2. Project desired velocity onto radial and tangential ---
+        Rotation2d angleToTarget = toTarget.getAngle();
+        Translation2d toTargetDir = toTarget.div(distance);
+
+        // --- 2. Get desired velocity ---
         Translation2d desiredVel = new Translation2d(
                 velocity.vxMetersPerSecond,
                 velocity.vyMetersPerSecond);
 
+        // --- 3. Decompose into radial and tangential ---
         double radialSpeed = desiredVel.dot(toTargetDir);
-        Translation2d tangential = desiredVel.minus(toTargetDir.times(radialSpeed));
-        double tangentialSpeed = tangential.getNorm();
+        Translation2d tangentialVec = desiredVel.minus(toTargetDir.times(radialSpeed));
+        double tangentialSpeed = tangentialVec.getNorm();
 
-        // --- 3. Limit tangential (sideways) speed ---
+        // --- 4. Limit tangential, scale radial proportionally ---
+        double tangentialScale = 1.0;
         if (tangentialSpeed > Constants.SwerveDriveConstants.kMaxStrafe) {
-            tangential = tangential.times(Constants.SwerveDriveConstants.kMaxStrafe / tangentialSpeed);
+            tangentialScale = Constants.SwerveDriveConstants.kMaxStrafe / tangentialSpeed;
+            tangentialVec = tangentialVec.times(tangentialScale);
+            tangentialSpeed = Constants.SwerveDriveConstants.kMaxStrafe;
         }
 
-        // --- 4. Recombine velocity and apply modifiers ---
-        Translation2d limitedVel = toTargetDir.times(radialSpeed).plus(tangential);
+        // Scale radial by the same amount to maintain input feel
+        radialSpeed *= tangentialScale;
+
+        // --- 5. Limit overall speed after scaling ---
+        Translation2d limitedVel = toTargetDir.times(radialSpeed).plus(tangentialVec);
+        double finalSpeed = limitedVel.getNorm();
+        if (finalSpeed > Constants.SwerveDriveConstants.kMaxSpeed) {
+            limitedVel = limitedVel.times(Constants.SwerveDriveConstants.kMaxSpeed / finalSpeed);
+        }
+
+        // --- 6. Apply modifier ---
         velocity.vxMetersPerSecond = limitedVel.getX() * Constants.SwerveDriveConstants.kAimingSpeedModifier;
         velocity.vyMetersPerSecond = limitedVel.getY() * Constants.SwerveDriveConstants.kAimingSpeedModifier;
 
-        // --- 5. Apply angular PID toward target ---
-        Rotation2d angleToTarget = toTargetDir.getAngle();
-        velocity.omegaRadiansPerSecond = RotationPID.calculate(angleToTarget.getRadians(), getHeading().getRadians());
-        SmartDashboard.putNumber("VisionAiming/angle", angleToTarget.getDegrees());
-        SmartDashboard.putNumber("VisionAiming/speed", velocity.omegaRadiansPerSecond);
+        // --- 7. Apply angular PID toward target ---
+        velocity.omegaRadiansPerSecond = RotationPID.calculate(
+                angleToTarget.getRadians(),
+                getHeading().getRadians());
 
-        // --- 6. Drive the swerve ---
+        SmartDashboard.putNumber("VisionAiming/currentHeading", getHeading().getDegrees());
+        SmartDashboard.putNumber("VisionAiming/targetAngle", angleToTarget.getDegrees());
+        SmartDashboard.putNumber("VisionAiming/angleError",
+                angleToTarget.minus(getHeading()).getDegrees());
+        SmartDashboard.putNumber("VisionAiming/omegaOutput", velocity.omegaRadiansPerSecond);
+
+        // --- 8. Drive field-oriented ---
         swerveDrive.driveFieldOriented(velocity);
     }
 
