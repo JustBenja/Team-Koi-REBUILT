@@ -117,6 +117,10 @@ public final class Constants {
 
     public static final int kOpenAngle = 67;
     public static final int kClosedAngle = 0;
+
+    public static final double kShakeDelay = 0.3; 
+    public static final double kShakeMax = 40;
+    public static final double kShakeMin = 10;
   }
 
   public static class IntakeRollerConstants {
