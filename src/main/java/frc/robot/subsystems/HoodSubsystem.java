@@ -27,7 +27,6 @@ public class HoodSubsystem extends SubsystemBase {
 
         // Start at initial position
         setAngle(Constants.HoodConstants.kStartingPos);
-        state = HoodState.AT_STARTING_POS;
     }
 
     public void setAngle(double degrees) {
